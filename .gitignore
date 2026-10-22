@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+
+
+
+
+#"ConnectionStrings": {3 #   "DefaultConnection": "Host=aws-0-eu-west-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.lpdfsopxczgppcqmzqrf;Password=BudgetTracker@2026;SSL Mode=Require;Trust Server Certificate=true" }

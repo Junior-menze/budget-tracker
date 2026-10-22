@@ -4,3 +4,19 @@ GET {{BudgetTrackerAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Create a new expense
+POST {{BudgetTrackerAPI_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "description": "Groceries",
+  "amount": 450.50,
+  "category": "Food",
+  "date": "2026-10-22T10:00:00Z",
+  "userId": "test-user-123"
+}
+
+### Get all expenses
+GET {{BudgetTrackerAPI_HostAddress}}/api/expenses
+Accept: application/json
