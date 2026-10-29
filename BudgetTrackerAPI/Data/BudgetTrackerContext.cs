@@ -1,10 +1,11 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BudgetTrackerAPI.Models;
 
 namespace BudgetTrackerAPI.Data;
 
-public class BudgetTrackerContext: DbContext
+public class BudgetTrackerContext: IdentityDbContext<AppUser>
 {
 	public BudgetTrackerContext(DbContextOptions<BudgetTrackerContext> options): base (options)
 	{
