@@ -15,8 +15,7 @@ export class App {
   
   authService = inject(AuthService);
   router = inject(Router);
-
-  // Modal State
+  isDarkMode = false;
   showLogoutModal = false;
 
   openLogoutModal() {
@@ -31,5 +30,14 @@ export class App {
     this.showLogoutModal = false;
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+   toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    if (this.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }
 }

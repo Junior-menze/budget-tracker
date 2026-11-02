@@ -16,5 +16,11 @@ namespace BudgetTrackerAPI.Models
         public string Category { get; set; } = "General";
 
         public string UserId { get; set; } = string.Empty;
+        public string? ReceiptUrl { get; set; } 
+        public bool IsRecurring { get; set; } = false; 
+        public bool IsPending { get; set; } = false; 
+        public DateTime? LastProcessedDate { get; set; } 
+
+
     }
 }

@@ -12,6 +12,8 @@ public class BudgetTrackerContext: IdentityDbContext<AppUser>
 
 	}
 
-	//This maps to the postgres 'Expense' table
+	//This maps to the postgres data tables
 	public DbSet<Expense> Expenses { get; set; }
+	public DbSet<Budget> Budgets { get; set; }
+
 }

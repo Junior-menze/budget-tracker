@@ -88,11 +88,128 @@ app.UseAuthorization();
 // 3. EXPENSES ENDPOINTS (Protected)
 // ==========================================
 
-// GET: Retrieve ONLY the logged-in user's expenses
-app.MapGet("/api/expenses", async (BudgetTrackerContext db, ClaimsPrincipal user) =>
+app.MapPost("/api/expenses/process-recurring", async (BudgetTrackerContext db, ClaimsPrincipal user) =>
 {
     var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    return await db.Expenses.Where(e => e.UserId == userId).ToListAsync();
+    var now = DateTime.UtcNow;
+
+    var recurringExpenses = await db.Expenses
+        .Where(e => e.UserId == userId && e.IsRecurring && !e.IsPending)
+        .ToListAsync();
+
+    int generatedCount = 0;
+
+    foreach (var re in recurringExpenses)
+    {
+        // Calculate when the next due date should be
+        DateTime baseDate = re.LastProcessedDate ?? re.Date;
+        DateTime nextDueDate = baseDate.AddMonths(1);
+
+        // Only generate if today is past the due date
+        if (now >= nextDueDate)
+        {
+            var pendingExpense = new Expense
+            {
+                UserId = userId!,
+                Description = re.Description,
+                Amount = re.Amount,
+                Category = re.Category,
+                Date = nextDueDate,
+                IsRecurring = false, // It becomes a normal expense once approved
+                IsPending = true,    // <--- Marked as Pending!
+                ReceiptUrl = null 
+            };
+            
+            db.Expenses.Add(pendingExpense);
+            
+            // Update the original recurring expense so it doesn't generate again this month
+            re.LastProcessedDate = nextDueDate;
+            generatedCount++;
+        }
+    }
+
+    if (generatedCount > 0) await db.SaveChangesAsync();
+    return Results.Ok(new { Generated = generatedCount });
+}).RequireAuthorization();
+
+// GET: Retrieve ONLY the logged-in user's expenses (with optional search/filter)
+app.MapGet("/api/expenses", async (string? search, string? category, BudgetTrackerContext db, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    
+    // Start with the user's expenses
+    var query = db.Expenses.Where(e => e.UserId == userId);
+
+    // Apply search filter (Description)
+    if (!string.IsNullOrEmpty(search))
+    {
+        query = query.Where(e => e.Description.ToLower().Contains(search.ToLower()));
+    }
+
+    // Apply category filter
+    if (!string.IsNullOrEmpty(category) && category != "All")
+    {
+        query = query.Where(e => e.Category == category);
+    }
+
+    // Order by most recent
+    return await query.OrderByDescending(e => e.Date).ToListAsync();
+}).RequireAuthorization();
+
+// GET: Generate smart insights for the user
+app.MapGet("/api/expenses/insights", async (BudgetTrackerContext db, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var expenses = await db.Expenses.Where(e => e.UserId == userId).ToListAsync();
+
+    if (!expenses.Any())
+        return Results.Ok(new { Message = "Add some expenses to unlock personalized insights!" });
+
+    // Calculate highest spending category
+    var topCategory = expenses
+        .GroupBy(e => e.Category)
+        .OrderByDescending(g => g.Sum(e => e.Amount))
+        .First();
+
+    // Calculate this month's spending
+    var currentMonth = DateTime.UtcNow.Month;
+    var currentYear = DateTime.UtcNow.Year;
+    var thisMonthTotal = expenses
+        .Where(e => e.Date.Month == currentMonth && e.Date.Year == currentYear)
+        .Sum(e => e.Amount);
+
+    string message = $"You've spent R {thisMonthTotal:N2} this month. Your biggest expense category is {topCategory.Key}.";
+
+    return Results.Ok(new { Message = message });
+}).RequireAuthorization();
+
+// GET: Retrieve the user's budgets
+app.MapGet("/api/budgets", async (BudgetTrackerContext db, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    return await db.Budgets.Where(b => b.UserId == userId).ToListAsync();
+}).RequireAuthorization();
+
+// POST: Create or Update a budget
+app.MapPost("/api/budgets", async (Budget budget, BudgetTrackerContext db, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    budget.UserId = userId!;
+
+    // Check if a budget for this category already exists for this user
+    var existingBudget = await db.Budgets.FirstOrDefaultAsync(b => b.UserId == userId && b.Category == budget.Category);
+
+    if (existingBudget != null)
+    {
+        existingBudget.MonthlyLimit = budget.MonthlyLimit; // Update
+    }
+    else
+    {
+        db.Budgets.Add(budget); // Create
+    }
+
+    await db.SaveChangesAsync();
+    return Results.Ok(budget);
 }).RequireAuthorization();
 
 // GET: Retrieve a single expense by ID (Only if it belongs to the user)
@@ -126,6 +243,9 @@ app.MapPut("/api/expenses/{id}", async (int id, Expense inputExpense, BudgetTrac
     expense.Amount = inputExpense.Amount;
     expense.Date = inputExpense.Date;
     expense.Category = inputExpense.Category;
+    expense.ReceiptUrl = inputExpense.ReceiptUrl; 
+    expense.IsRecurring = inputExpense.IsRecurring;
+    expense.IsPending = inputExpense.IsPending;
 
     await db.SaveChangesAsync();
     return Results.NoContent();
@@ -140,6 +260,19 @@ app.MapDelete("/api/expenses/{id}", async (int id, BudgetTrackerContext db, Clai
     if (expense is null) return Results.NoContent();
 
     db.Expenses.Remove(expense);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+}).RequireAuthorization();
+
+// DELETE: Remove a budget
+app.MapDelete("/api/budgets/{id}", async (int id, BudgetTrackerContext db, ClaimsPrincipal user) =>
+{
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var budget = await db.Budgets.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+    
+    if (budget is null) return Results.NotFound();
+
+    db.Budgets.Remove(budget);
     await db.SaveChangesAsync();
     return Results.NoContent();
 }).RequireAuthorization();

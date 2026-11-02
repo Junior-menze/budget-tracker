@@ -1,88 +1,225 @@
-<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
   <div class="max-w-5xl mx-auto">
     
     <!-- Header -->
-    <div class="mb-10">
-      <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Budget Tracker</h1>
-      <p class="mt-2 text-lg text-slate-500">Keep your finances in check.</p>
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight transition-colors">Budget Tracker</h1>
+        <p class="mt-2 text-lg text-slate-500 dark:text-slate-400 transition-colors">Keep your finances in check.</p>
+      </div>
     </div>
 
-    <!-- Dashboard Summary Card -->
-    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 md:p-12 mb-10 flex flex-col md:flex-row items-center justify-between gap-12">
-      
-      <!-- Chart Area -->
-      <div class="relative w-full md:w-1/2 h-64 md:h-80 flex justify-center items-center">
-        <div *ngIf="expenses.length === 0 && !isLoading" class="absolute inset-0 flex items-center justify-center text-slate-400 font-medium z-10 text-center">
-          Add an expense to<br/>see your chart.
+        <!-- Pending Recurring Expenses Banner -->
+    <div *ngIf="pendingExpenses.length > 0" class="mb-10 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-2xl shadow-sm p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-amber-800 dark:text-amber-200">
+      <div class="flex items-start gap-4">
+        <div class="bg-amber-100 dark:bg-amber-800 p-2 rounded-lg">
+          <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
-        
-        <canvas #expenseChart [style.opacity]="expenses.length === 0 ? '0' : '1'" class="transition-opacity duration-300"></canvas>
+        <div>
+          <h3 class="font-bold text-lg mb-1">Action Required: Recurring Expenses</h3>
+          <p class="text-sm">You have {{ pendingExpenses.length }} recurring expense(s) due. Please approve them to add them to your budget.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights Engine Banner -->
+    <div *ngIf="insightMessage" class="mb-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 flex items-start gap-4 text-white">
+      <div class="bg-white/20 p-2 rounded-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-lg mb-1">Smart Insight</h3>
+        <p class="text-blue-100">{{ insightMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+      
+      <!-- Doughnut Chart Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-slate-700 p-6 flex flex-col transition-colors duration-300">
+        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2 transition-colors">Spending Breakdown</h3>
+        <div class="relative w-full h-64 flex justify-center items-center">
+          <div *ngIf="expenses.length === 0 && !isLoading" class="absolute inset-0 flex items-center justify-center text-slate-400 font-medium text-center">No data.</div>
+          <canvas #expenseChart [style.opacity]="expenses.length === 0 ? '0' : '1'"></canvas>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-4" *ngIf="expenses.length > 0">
+          <div *ngFor="let item of chartLegend" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-900/50">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" [style.background-color]="item.color"></span>
+              <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{ item.label }}</span>
+            </div>
+            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ item.percentage | number:'1.0-0' }}%</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Custom Legend Area -->
-      <div class="w-full md:w-1/2">
-        <h3 class="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">Spending Breakdown</h3>
-        <div class="space-y-5" *ngIf="expenses.length > 0">
-          <div *ngFor="let item of chartLegend" class="flex items-center justify-between group">
-            <div class="flex items-center gap-3">
-              <span class="w-4 h-4 rounded-full shadow-sm" [style.background-color]="item.color"></span>
-              <span class="text-slate-600 font-medium group-hover:text-slate-900 transition-colors">{{ item.label }}</span>
+      <!-- Bar Chart Card -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-slate-700 p-6 flex flex-col transition-colors duration-300">
+        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2 transition-colors">6-Month Trend</h3>
+        <div class="relative w-full h-64 flex justify-center items-center">
+          <div *ngIf="expenses.length === 0 && !isLoading" class="absolute inset-0 flex items-center justify-center text-slate-400 font-medium text-center">No data.</div>
+          <canvas #trendChart [style.opacity]="expenses.length === 0 ? '0' : '1'"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+   <!-- Add Expense Card -->
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-10 transition-colors duration-300">
+  <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 transition-colors">Add an Expense</h2>
+  
+  <form (ngSubmit)="onSubmit()" #expenseForm="ngForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    
+    <!-- Description -->
+    <div class="md:col-span-2">
+      <input type="text" [(ngModel)]="newExpense.description" name="description" placeholder="Description (e.g. Groceries)" required
+             class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:bg-slate-700 dark:text-white dark:placeholder-slate-400">
+    </div>
+    
+    <!-- Amount -->
+    <div>
+      <input type="number" [(ngModel)]="newExpense.amount" name="amount" placeholder="Amount" required
+             class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:bg-slate-700 dark:text-white dark:placeholder-slate-400">
+    </div>
+    
+    <!-- Category -->
+    <div>
+      <select [(ngModel)]="newExpense.category" name="category"
+              class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-white">
+        <option value="Food">Food</option>
+        <option value="Rent">Rent</option>
+        <option value="Transport">Transport</option>
+        <option value="Entertainment">Entertainment</option>
+      </select>
+    </div>
+    
+    <!-- File Upload -->
+    <div>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" title="Upload Receipt"
+             class="w-full px-2 py-1.5 text-sm text-slate-500 dark:text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-white cursor-pointer border border-slate-300 dark:border-slate-600 rounded-lg">
+    </div>
+
+    <!-- Recurring Checkbox -->
+    <div class="md:col-span-5 flex items-center mt-2">
+      <input type="checkbox" id="isRecurring" [(ngModel)]="newExpense.isRecurring" name="isRecurring"
+             class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 cursor-pointer">
+      <label for="isRecurring" class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+        Repeat this expense every month (e.g., Rent, Subscriptions)
+      </label>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="md:col-span-5 mt-2">
+      <button type="submit" [disabled]="!expenseForm.form.valid || isUploading"
+              class="w-full md:w-auto px-6 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        <svg *ngIf="isUploading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        {{ isUploading ? 'Uploading...' : 'Add Expense' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+    <!-- Monthly Budgets Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-10 transition-colors duration-300">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white transition-colors">Monthly Budgets</h2>
+        
+        <!-- Set Budget Form -->
+        <form (ngSubmit)="onSaveBudget()" class="flex gap-2 w-full md:w-auto">
+          <select [(ngModel)]="newBudget.category" name="budgetCategory"
+                  class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-700 dark:text-white text-sm">
+            <option value="Food">Food</option>
+            <option value="Rent">Rent</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+          </select>
+          <input type="number" [(ngModel)]="newBudget.monthlyLimit" name="budgetLimit" placeholder="Limit (R)" required
+                 class="w-28 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none dark:bg-slate-700 dark:text-white text-sm">
+          <button type="submit" [disabled]="newBudget.monthlyLimit <= 0 || isSavingBudget"
+                  class="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:bg-slate-300 dark:disabled:bg-slate-600 text-sm whitespace-nowrap">
+            Set Limit
+          </button>
+        </form>
+      </div>
+
+      <!-- Budgets List -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" *ngIf="budgets.length > 0; else noBudgets">
+        <div *ngFor="let budget of budgets" class="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 transition-colors">
+          
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-bold text-slate-700 dark:text-slate-300">{{ budget.category }}</span>
+
+            <!-- VIEW MODE -->
+           <div *ngIf="editingBudgetId !== budget.id" class="flex items-center gap-2">
+              <span class="text-sm font-semibold mr-2" [ngClass]="getSpentThisMonth(budget.category) > budget.monthlyLimit ? 'text-red-500' : 'text-green-500'">
+                R {{ getSpentThisMonth(budget.category) | number:'1.0-0' }} / R {{ budget.monthlyLimit | number:'1.0-0' }}
+              </span>
+
+              <button (click)="startEditing(budget)" class="text-blue-500 hover:text-blue-700 transition-colors" title="Edit Budget">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+
+              <button (click)="openDeleteBudgetModal(budget.id)" class="text-red-500 hover:text-red-700 transition-colors" title="Delete Budget">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
             </div>
-            <div class="text-right">
-              <p class="text-slate-900 font-bold">R {{ item.value | number:'1.2-2' }}</p>
-              <p class="text-slate-400 text-xs font-semibold">{{ item.percentage | number:'1.0-0' }}%</p>
+
+            <!-- EDIT MODE -->
+            <div *ngIf="editingBudgetId === budget.id" class="flex items-center gap-2">
+              <input type="number" [(ngModel)]="editLimitValue" 
+                     class="w-20 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md outline-none dark:bg-slate-700 dark:text-white" 
+                     placeholder="Limit" />
+              <button (click)="saveEdit(budget.category)" class="text-xs bg-green-600 text-white px-2 py-1 rounded-md font-semibold hover:bg-green-700 transition-colors">
+                Save
+              </button>
+              <button (click)="cancelEditing()" class="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold">
+                Cancel
+              </button>
+            </div>
+          </div>
+          
+          <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+            <div class="h-3 rounded-full transition-all duration-500" 
+                 [ngClass]="getSpentThisMonth(budget.category) > budget.monthlyLimit ? 'bg-red-500' : 'bg-blue-500'"
+                 [style.width.%]="getBudgetPercentage(budget.category, budget.monthlyLimit)">
             </div>
           </div>
         </div>
       </div>
 
+      <ng-template #noBudgets>
+        <p class="text-slate-500 dark:text-slate-400 text-center py-4">You haven't set any monthly budgets yet. Set one above!</p>
+      </ng-template>
     </div>
 
-    <!-- Add Expense Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-10">
-      <h2 class="text-2xl font-bold text-slate-800 mb-6">Add an Expense</h2>
+    <!-- Expenses Table Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-300">
       
-      <form (ngSubmit)="onSubmit()" #expenseForm="ngForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">My Expenses</h2>
         
-        <div class="md:col-span-2">
-          <input type="text" [(ngModel)]="newExpense.description" name="description" placeholder="Description (e.g. Groceries)" required
-                 class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-        </div>
-
-        <div>
-          <input type="number" [(ngModel)]="newExpense.amount" name="amount" placeholder="Amount" required
-                 class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-        </div>
-        
-        <div>
-          <select [(ngModel)]="newExpense.category" name="category"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white">
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div class="relative w-full sm:w-64">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Search description..." 
+                   class="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-colors dark:bg-slate-700 dark:text-white">
+          </div>
+          <select [(ngModel)]="selectedCategory" (change)="applyFilters()"
+                  class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-colors bg-white dark:bg-slate-700 dark:text-white">
+            <option value="All">All Categories</option>
             <option value="Food">Food</option>
             <option value="Rent">Rent</option>
             <option value="Transport">Transport</option>
             <option value="Entertainment">Entertainment</option>
           </select>
         </div>
-
-        <div class="md:col-span-4 mt-2">
-          <button type="submit" [disabled]="!expenseForm.form.valid"
-                  class="w-full md:w-auto px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed">
-            Add Expense
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Expenses Table Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-6 border-b border-slate-200">
-        <h2 class="text-2xl font-bold text-slate-800">My Expenses</h2>
       </div>
       
       <div class="overflow-x-auto min-h-[200px]">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
+            <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider transition-colors">
               <th class="px-6 py-4 font-medium">Date</th>
               <th class="px-6 py-4 font-medium">Description</th>
               <th class="px-6 py-4 font-medium">Category</th>
@@ -90,40 +227,67 @@
               <th class="px-6 py-4 font-medium text-center">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200">
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700 transition-colors">
             
-            <!-- Loading State -->
             <tr *ngIf="isLoading">
-              <td colspan="5" class="px-6 py-10 text-center text-slate-400">
+              <td colspan="5" class="px-6 py-10 text-center text-slate-400 dark:text-slate-500">
                 <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
                 <p>Loading your expenses...</p>
               </td>
             </tr>
 
-            <!-- Data Rows -->
             <ng-container *ngIf="!isLoading">
-              <tr *ngFor="let expense of expenses" class="hover:bg-slate-50 transition-colors">
-                <td class="px-6 py-4 text-slate-600">{{ expense.date | date:'mediumDate' }}</td>
-                <td class="px-6 py-4 font-medium text-slate-900">{{ expense.description }}</td>
-                <td class="px-6 py-4">
-                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+<!-- Change the <tr> to this: -->
+<tr *ngFor="let expense of expenses" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" 
+    [ngClass]="{'bg-amber-50 dark:bg-amber-900/20': expense.isPending}">                <td class="px-6 py-4 text-slate-600 dark:text-slate-300 transition-colors">{{ expense.date | date:'mediumDate' }}</td>
+                <td class="px-6 py-4 font-medium text-slate-900 dark:text-white transition-colors flex items-center gap-2">
+                 {{ expense.description }}
+                 <!-- The little recurring icon! -->
+                 <svg *ngIf="expense.isRecurring" class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Recurring Monthly"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </td>                <td class="px-6 py-4">
+                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 transition-colors"
+                        [ngClass]="isOverspent(expense.category) ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300'">
                     {{ expense.category }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-right font-bold text-slate-900">
+                <td class="px-6 py-4 text-right font-bold text-slate-900 dark:text-white transition-colors">
                   R {{ expense.amount | number:'1.2-2' }}
                 </td>
-                <td class="px-6 py-4 text-center">
-                  <button (click)="openDeleteModal(expense.id)" class="text-red-500 hover:text-red-700 font-medium text-sm transition-colors">
-                    Delete
-                  </button>
+                  <td class="px-6 py-4 text-center flex justify-center items-center gap-3">
+                  
+                  <ng-container *ngIf="!expense.isPending">
+                    <!-- View Receipt -->
+                    <a *ngIf="expense.receiptUrl" [href]="expense.receiptUrl" target="_blank" class="text-slate-400 hover:text-blue-500 transition-colors" title="View Receipt">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </a>
+
+                    <!-- Edit Expense Icon -->
+                    <button (click)="openEditModal(expense)" class="text-slate-400 hover:text-blue-600 transition-colors" title="Edit Expense">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+
+                    <!-- Delete Expense Icon -->
+                    <button (click)="openDeleteModal(expense.id)" class="text-slate-400 hover:text-red-600 transition-colors" title="Delete Expense">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  </ng-container>
+
+                  <!-- Pending Approve/Decline Buttons -->
+                  <ng-container *ngIf="expense.isPending">
+                    <button (click)="approvePending(expense)" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded shadow-sm transition-colors">
+                      Approve
+                    </button>
+                    <button (click)="declinePending(expense)" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold rounded shadow-sm transition-colors">
+                      Decline
+                    </button>
+                  </ng-container>
+
                 </td>
               </tr>
               
-              <!-- Empty State -->
               <tr *ngIf="expenses.length === 0">
-                <td colspan="5" class="px-6 py-10 text-center text-slate-500">
-                  No expenses found. Add one above!
+                <td colspan="5" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400 transition-colors">
+                  No expenses found. Try adjusting your filters or add a new expense above!
                 </td>
               </tr>
             </ng-container>
@@ -136,51 +300,135 @@
   </div>
 </div>
 
-<!-- DELETE MODAL OVERLAY -->
-<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-  <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform transition-all">
-    <ng-container *ngIf="modalType === 'confirm'">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
-        <svg class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+
+<!-- EDIT EXPENSE MODAL -->
+<div *ngIf="showEditModal && editingExpense" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-colors">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-lg w-full p-6 transform transition-all border border-transparent dark:border-slate-700">
+    
+    <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Edit Expense</h3>
+
+    <form (ngSubmit)="saveEditedExpense()" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Description -->
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+          <input type="text" [(ngModel)]="editingExpense.description" name="editDescription" required
+                 class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:bg-slate-700 dark:text-white">
+        </div>
+
+        <!-- Amount -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Amount (R)</label>
+          <input type="number" [(ngModel)]="editingExpense.amount" name="editAmount" required
+                 class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:bg-slate-700 dark:text-white">
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+          <select [(ngModel)]="editingExpense.category" name="editCategory"
+                  class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-slate-700 dark:text-white">
+            <option value="Food">Food</option>
+            <option value="Rent">Rent</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+          </select>
+        </div>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 mb-2">Delete Expense</h3>
-      <p class="text-slate-500 mb-6">Are you sure you want to delete this expense? This action cannot be undone.</p>
-      <div class="flex gap-3">
-        <button (click)="closeModal()" class="flex-1 py-2.5 rounded-lg font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+
+      <!-- File Upload (Replace Receipt) -->
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          Upload New Receipt (Leave blank to keep current)
+        </label>
+        <input type="file" (change)="onEditFileSelected($event)" accept="image/*"
+               class="w-full px-2 py-1.5 text-sm text-slate-500 dark:text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-white cursor-pointer border border-slate-300 dark:border-slate-600 rounded-lg">
+      </div>
+
+      <!-- Recurring Checkbox -->
+      <div class="flex items-center">
+        <input type="checkbox" id="editIsRecurring" [(ngModel)]="editingExpense.isRecurring" name="editIsRecurring"
+               class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 cursor-pointer">
+        <label for="editIsRecurring" class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+          Repeat this expense every month
+        </label>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+        <button type="button" (click)="closeEditModal()" 
+                class="flex-1 py-2.5 rounded-lg font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
           Cancel
         </button>
-        <button (click)="confirmDelete()" class="flex-1 py-2.5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors">
-          Delete
+        <button type="submit" [disabled]="isUpdating"
+                class="flex-1 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex justify-center items-center">
+          <svg *ngIf="isUpdating" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          {{ isUpdating ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
-    </ng-container>
+    </form>
 
+  </div>
+</div>
+
+<!-- BUDGET DELETE MODAL OVERLAY -->
+<div *ngIf="showBudgetDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-colors">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform transition-all border border-transparent dark:border-slate-700">
+    
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4 transition-colors">
+      <svg class="h-10 w-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    </div>
+    
+    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Delete Budget Limit</h3>
+    <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">
+      Are you sure you want to remove this budget limit? Your recorded expenses will not be deleted.
+    </p>
+    
+    <div class="flex gap-3">
+      <button (click)="closeBudgetDeleteModal()" 
+              class="flex-1 py-2.5 rounded-lg font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+        Cancel
+      </button>
+      <button (click)="confirmDeleteBudget()" [disabled]="isDeletingBudget"
+              class="flex-1 py-2.5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors flex justify-center items-center disabled:bg-red-400">
+        <svg *ngIf="isDeletingBudget" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        {{ isDeletingBudget ? 'Deleting...' : 'Delete' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL OVERLAY -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm transition-colors">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform transition-all border border-transparent dark:border-slate-700">
+    <ng-container *ngIf="modalType === 'confirm'">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4 transition-colors">
+        <svg class="h-10 w-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Delete Expense</h3>
+      <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">Are you sure you want to delete this expense? This action cannot be undone.</p>
+      <div class="flex gap-3">
+        <button (click)="closeModal()" class="flex-1 py-2.5 rounded-lg font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+        <button (click)="confirmDelete()" class="flex-1 py-2.5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors">Delete</button>
+      </div>
+    </ng-container>
     <ng-container *ngIf="modalType === 'success'">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
-        <svg class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-4 transition-colors">
+        <svg class="h-10 w-10 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 mb-2">Deleted!</h3>
-      <p class="text-slate-500 mb-6">{{ modalMessage }}</p>
-      <button (click)="closeModal()" class="w-full py-2.5 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
-        Done
-      </button>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Deleted!</h3>
+      <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">{{ modalMessage }}</p>
+      <button (click)="closeModal()" class="w-full py-2.5 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">Done</button>
     </ng-container>
-
     <ng-container *ngIf="modalType === 'error'">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
-        <svg class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4 transition-colors">
+        <svg class="h-10 w-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 mb-2">Error</h3>
-      <p class="text-slate-500 mb-6">{{ modalMessage }}</p>
-      <button (click)="closeModal()" class="w-full py-2.5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors">
-        Close
-      </button>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors">Error</h3>
+      <p class="text-slate-500 dark:text-slate-400 mb-6 transition-colors">{{ modalMessage }}</p>
+      <button (click)="closeModal()" class="w-full py-2.5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors">Close</button>
     </ng-container>
   </div>
 </div>

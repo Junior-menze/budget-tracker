@@ -92,6 +92,30 @@ namespace BudgetTrackerAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BudgetTrackerAPI.Models.Budget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("MonthlyLimit")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Budgets");
+                });
+
             modelBuilder.Entity("BudgetTrackerAPI.Models.Expense", b =>
                 {
                     b.Property<int>("Id")
@@ -112,6 +136,18 @@ namespace BudgetTrackerAPI.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPending")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastProcessedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReceiptUrl")
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")

@@ -1,18 +1,18 @@
-<div class="bg-white font-sans">
+<div class="bg-white dark:bg-slate-900 font-sans transition-colors duration-300">
   <!-- Hero Section -->
   <div class="relative isolate px-6 pt-14 lg:px-8 max-w-7xl mx-auto">
     <div class="mx-auto max-w-2xl py-24 sm:py-32 text-center">
-      <h1 class="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-7xl mb-6">
-        Take control of your <span class="text-blue-600">finances</span>.
+      <h1 class="text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-7xl mb-6 transition-colors">
+        Take control of your <span class="text-blue-600 dark:text-blue-500">finances</span>.
       </h1>
-      <p class="mt-6 text-lg leading-8 text-slate-600 mb-10">
-        Track your expenses, categorize your spending, and visualize your budget with our simple, secure, and lightning-fast personal finance tracker.
+      <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-400 mb-10 transition-colors">
+        Track expenses, upload receipts, set smart budgets, and visualize your spending trends with our lightning-fast personal finance tracker.
       </p>
       <div class="flex items-center justify-center gap-x-6">
         <a routerLink="/register" class="rounded-lg bg-blue-600 px-8 py-3.5 text-lg font-semibold text-white shadow-sm hover:bg-blue-500 transition-all">
           Get started for free
         </a>
-        <a routerLink="/login" class="text-lg font-semibold leading-6 text-slate-900 hover:text-blue-600 transition-colors">
+        <a routerLink="/login" class="text-lg font-semibold leading-6 text-slate-900 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           Log in <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -20,52 +20,92 @@
   </div>
 
   <!-- Features Section -->
-  <div class="bg-slate-50 py-24 sm:py-32 border-t border-slate-200">
+  <div class="bg-slate-50 dark:bg-slate-800/50 py-24 sm:py-32 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center">
-        <h2 class="text-base font-semibold leading-7 text-blue-600 uppercase tracking-widest">Track smarter</h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Everything you need to manage your money</p>
+        <h2 class="text-base font-semibold leading-7 text-blue-600 dark:text-blue-500 uppercase tracking-widest transition-colors">Built for modern finance</h2>
+        <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl transition-colors">Everything you need to manage your money</p>
       </div>
       
       <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-        <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+        <!-- Changed to a 3-column grid for 6 features -->
+        <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3">
           
-          <!-- Feature 1 -->
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <!-- Feature 1: Expense Tracking & Receipts -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              Expense Tracking
+              Expense & Receipt Tracking
             </dt>
-            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
-              <p class="flex-auto">Log your daily transactions in seconds. Never lose track of where your money goes with our intuitive dashboard.</p>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Log daily transactions in seconds and securely upload digital receipts. Never lose a paper trail again.</p>
             </dd>
           </div>
 
-          <!-- Feature 2 -->
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <!-- Feature 2: Visual Analytics -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
               </div>
               Visual Analytics
             </dt>
-            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
-              <p class="flex-auto">Instantly see beautiful, interactive charts showing exactly which categories are draining your wallet.</p>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Instantly see beautiful doughnut charts for category breakdowns and 6-month bar trends to spot your habits.</p>
             </dd>
           </div>
 
-          <!-- Feature 3 -->
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <!-- Feature 3: Smart Budgets -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600 text-white shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              Monthly Budget Limits
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Set limits for categories like Food or Rent. Watch dynamic progress bars turn red if you overspend.</p>
+            </dd>
+          </div>
+
+          <!-- Feature 4: Smart Insights -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600 text-white shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </div>
+              Smart Insights
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Get instant, personalized insights on your highest spending categories so you know exactly where your money goes.</p>
+            </dd>
+          </div>
+
+          <!-- Feature 5: Advanced Filtering -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-600 text-white shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+              </div>
+              Search & Filtering
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Find exactly what you're looking for instantly with powerful database search and category filters.</p>
+            </dd>
+          </div>
+
+          <!-- Feature 6: Security & Dark Mode -->
+          <div class="flex flex-col bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300 hover:shadow-md">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900 dark:text-white transition-colors">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 dark:bg-slate-700 text-white shadow-sm">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
               </div>
-              Bank-Level Security
+              Security & Dark Mode
             </dt>
-            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
-              <p class="flex-auto">Your data is heavily encrypted and protected using JWT authentication and enterprise-grade identity management.</p>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600 dark:text-slate-400 transition-colors">
+              <p class="flex-auto">Your data is protected with JWT authentication. Switch to our elegant Dark Mode for comfortable viewing.</p>
             </dd>
           </div>
 
