@@ -26,7 +26,7 @@ export interface Budget {
   providedIn: 'root'
 })
 export class ExpenseService {
-  private apiUrl = 'http://localhost:5045/api/expenses';
+  private apiUrl = 'https://budget-tracker-api-iaaf.onrender.com';
 
   constructor(private http: HttpClient) { }
 
