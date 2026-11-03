@@ -6,7 +6,7 @@ import { Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://budget-tracker-api-iaaf.onrender.com';
+private apiUrl = 'https://budget-tracker-api-iaaf.onrender.com/api/auth';
 
   constructor(private http: HttpClient) { }
 
