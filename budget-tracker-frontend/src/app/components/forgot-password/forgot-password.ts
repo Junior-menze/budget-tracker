@@ -14,13 +14,28 @@ export class ForgotPasswordComponent {
   email = '';
   message = '';
   isSuccess = false;
+  isLoading = false; 
 
   constructor(private authService: AuthService) {}
 
   onSubmit() {
-    this.authService.forgotPassword(this.email).subscribe(() => {
-      this.isSuccess = true;
-      this.message = 'If an account exists, a reset link has been sent. Check the C# terminal for the link!';
+    if (!this.email) return;
+    
+    this.isLoading = true; 
+    
+    this.authService.forgotPassword(this.email).subscribe({
+      next: () => {
+        this.isSuccess = true;
+        this.isLoading = false;
+        this.message = 'If an account exists, a reset link has been sent. Please check your Mailtrap inbox to view the email.';
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 400) {
+          this.isSuccess = true; 
+          this.message = 'If an account exists, a reset link has been sent. (Note: If testing, please wait a few seconds before trying again).';
+        }
+      }
     });
   }
 }

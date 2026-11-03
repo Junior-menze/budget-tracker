@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using BudgetTrackerAPI.Data;
 using BudgetTrackerAPI.Models;
+using BudgetTrackerAPI.Services;
 using System.Text;
 using System.Security.Claims;
 
@@ -18,6 +19,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // CORS Policy
+builder.Services.AddScoped<EmailService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -249,7 +252,7 @@ app.MapPut("/api/expenses/{id}", async (int id, Expense inputExpense, BudgetTrac
 
     await db.SaveChangesAsync();
     return Results.NoContent();
-}).RequireAuthorization();
+}).RequireAuthorization();  
 
 // DELETE: Remove an expense (Only if it belongs to the user)
 app.MapDelete("/api/expenses/{id}", async (int id, BudgetTrackerContext db, ClaimsPrincipal user) =>
@@ -326,20 +329,40 @@ authGroup.MapPost("/login", async (UserManager<AppUser> userManager, IConfigurat
     return Results.Ok(new { Token = tokenHandler.WriteToken(token) });
 });
 
-authGroup.MapPost("/forgot-password", async (UserManager<AppUser> userManager, ForgotPasswordDto dto) =>
+authGroup.MapPost("/forgot-password", async (UserManager<AppUser> userManager,EmailService emailService, ForgotPasswordDto dto) =>
 {
     var user = await userManager.FindByEmailAsync(dto.Email);
     if (user == null) return Results.Ok(new { Message = "If an account exists, a reset link has been sent." });
 
     var token = await userManager.GeneratePasswordResetTokenAsync(user);
-    
-    // Print to console for local testing
-    Console.WriteLine($"\n=======================================================");
-    Console.WriteLine($"PASSWORD RESET LINK FOR: {dto.Email}");
-    Console.WriteLine($"http://localhost:4200/reset-password?email={dto.Email}&token={Uri.EscapeDataString(token)}");
-    Console.WriteLine($"=======================================================\n");
+    var encodedToken = Uri.EscapeDataString(token);
 
-    return Results.Ok(new { Message = "If an account exists, a reset link has been sent." });
+    var resetLink = $"http://localhost:4200/reset-password?email={dto.Email}&token={encodedToken}";
+
+    
+    // Send the email
+    try
+    {
+        var emailBody = $@"
+            <h2>Password Reset Request</h2>
+            <p>Hello {user.FirstName},</p>
+            <p>You requested to reset your password. Click the link below to set a new one:</p>
+            <a href='{resetLink}' style='padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;'>Reset Password</a>
+            <p>If you didn't request this, you can safely ignore this email.</p>
+        ";
+
+        await emailService.SendEmailAsync(dto.Email, "Reset Your Budget Tracker Password", emailBody);
+        
+        return Results.Ok(new { Message = "If an account exists, a reset link has been sent." });
+    }
+    catch (Exception ex)
+    {
+        // Log the error in a real app
+        Console.WriteLine($"Email failed: {ex.Message}");
+        return Results.BadRequest(new { Message = "Failed to send email. Please try again later." 
+        
+    });
+}
 });
 
 authGroup.MapPost("/reset-password", async (UserManager<AppUser> userManager, ResetPasswordDto dto) =>
